@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="standart_margin_8dp">8dp</dimen>
+    <dimen name="standart_margin_0dp">0dp</dimen>
+    <dimen name="service_output_string_size_30sp">30sp</dimen>
+</resources>
