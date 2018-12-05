@@ -14,13 +14,27 @@
         android:layout_marginStart="@dimen/standart_margin_8dp"
         android:layout_marginTop="@dimen/standart_margin_8dp"
         android:layout_marginEnd="@dimen/standart_margin_8dp"
-        android:layout_marginBottom="@dimen/standart_margin_8dp"
+        android:layout_marginBottom="8dp"
         android:text="@string/service_off"
         android:textAlignment="center"
         android:textColor="@android:color/background_dark"
         android:textSize="@dimen/service_output_string_size_30sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/service_stop_service"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/service_stop_service"
+        android:layout_width="@dimen/standart_margin_0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/standart_margin_8dp"
+        android:layout_marginEnd="@dimen/standart_margin_8dp"
+        android:layout_marginBottom="@dimen/standart_margin_8dp"
+        android:backgroundTint="@color/colorAccent"
+        android:text="@string/stop_service"
+        android:textColor="@android:color/background_light"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 </android.support.constraint.ConstraintLayout>

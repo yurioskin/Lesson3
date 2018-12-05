@@ -25,11 +25,20 @@ public class MyIntentService extends IntentService {
     public static final int MSG_UNREGISTER_CLIENT = 0x00002;
     public static final int MSG_SET_VALUE = 0x00003;
 
+    public static boolean sShouldStop;
+
     public static final String MSG_KEY = "message_kew";
 
     public MyIntentService() {
         super("MyIntentService");
     }
+
+    @Override
+    public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
+        sShouldStop = false;
+        return super.onStartCommand(intent, flags, startId);
+    }
+
 
     private List<Messenger> mClients = new ArrayList<>();
 
@@ -62,7 +71,10 @@ public class MyIntentService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         try {
             for (int i = 0; ;i++) {
-                String s = ("Print string number " + i);
+                if (sShouldStop){
+                    return;
+                }
+                String s = (getResources().getString(R.string.print_string_number, i));
                 Message msg = Message.obtain(null,0,s);
                 for (Messenger messenger:mClients
                      ) {
@@ -75,6 +87,8 @@ public class MyIntentService extends IntentService {
         }
     }
 
+
+
     public static final Intent getIntentForSend(@NonNull Context context, @NonNull String message){
         Intent intent = newIntent(context);
         intent.putExtra(MSG_KEY, message);
@@ -85,8 +99,6 @@ public class MyIntentService extends IntentService {
         Intent intent = new Intent(context, MyIntentService.class);
         return intent;
     }
-
-
 }
 
 

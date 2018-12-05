@@ -13,11 +13,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 public class SecondActivity extends AppCompatActivity {
 
     private TextView mTextView;
+
+    private Button mButton;
 
     private Messenger mService;
     private Messenger mMessenger = new Messenger(new IncomingHandler());
@@ -30,6 +33,17 @@ public class SecondActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_second);
         initView();
+        initListener();
+    }
+
+    private void initListener() {
+        mButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MyIntentService.sShouldStop = true;
+                mTextView.setText(getResources().getString(R.string.intent_service_was_stopped));
+            }
+        });
     }
 
     @Override
@@ -46,6 +60,8 @@ public class SecondActivity extends AppCompatActivity {
 
     private void initView() {
         mTextView = findViewById(R.id.second_activity_text_view);
+
+        mButton = findViewById(R.id.service_stop_service);
 
     }
 
