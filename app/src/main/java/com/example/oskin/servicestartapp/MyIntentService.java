@@ -23,7 +23,8 @@ public class MyIntentService extends IntentService {
 
     public static final int MSG_REGISTER_CLIENT = 0x00001;
     public static final int MSG_UNREGISTER_CLIENT = 0x00002;
-    public static final int MSG_SET_VALUE = 0x00003;
+    public static final int MSG_CURENT_INTENT_STOP = 0x00003;
+    public static final int MSG_CURRENT_VALUE = 0x00004;
 
     public static boolean sShouldStop;
 
@@ -60,8 +61,6 @@ public class MyIntentService extends IntentService {
                 case MSG_UNREGISTER_CLIENT:
                     mClients.remove(msg.replyTo);
                     break;
-                case MSG_SET_VALUE:
-                    break;
             }
         }
     }
@@ -69,15 +68,19 @@ public class MyIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        sShouldStop = false;
+        Message msg;
         try {
             for (int i = 0; ;i++) {
                 if (sShouldStop){
+                    msg = Message.obtain(null, MSG_CURENT_INTENT_STOP, intent.getStringExtra(MSG_KEY));
+                    for (Messenger messenger:mClients) {
+                        messenger.send(msg);
+                    }
                     return;
                 }
-                String s = (getResources().getString(R.string.print_string_number, i));
-                Message msg = Message.obtain(null,0,s);
-                for (Messenger messenger:mClients
-                     ) {
+                msg = Message.obtain(null,MSG_CURRENT_VALUE,i);
+                for (Messenger messenger:mClients) {
                     messenger.send(msg);
                 }
                 TimeUnit.SECONDS.sleep(1);
