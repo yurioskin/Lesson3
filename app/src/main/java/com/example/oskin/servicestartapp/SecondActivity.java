@@ -44,7 +44,14 @@ public class SecondActivity extends AppCompatActivity {
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MyIntentService.sShouldStop = true;
+                Message msg = Message.obtain(null, MyService.MSG_INTERRUPT);
+                msg.replyTo = mMessenger;
+                try {
+                    mService.send(msg);
+                }
+                catch (RemoteException exc){
+                    exc.printStackTrace();
+                }
             }
         });
     }
@@ -56,7 +63,7 @@ public class SecondActivity extends AppCompatActivity {
     }
 
     public void bindService(){
-        bindService(MyIntentService.getIntentForSend(SecondActivity.this, "Second Activity"), mServiceConnection, Context.BIND_AUTO_CREATE);
+        bindService(MyService.getIntentForSend(SecondActivity.this, "Second Activity"), mServiceConnection, Context.BIND_AUTO_CREATE);
         Log.v("SecondActivity","bind");
     }
 
@@ -67,7 +74,7 @@ public class SecondActivity extends AppCompatActivity {
     }
 
     public void unbindService(){
-        Message msg = Message.obtain(null, MyIntentService.MSG_UNREGISTER_CLIENT);
+        Message msg = Message.obtain(null, MyService.MSG_UNREGISTER_CLIENT);
         msg.replyTo = mMessenger;
         try {
             mService.send(msg);
@@ -83,7 +90,7 @@ public class SecondActivity extends AppCompatActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mService = new Messenger(service);
-            Message msg = Message.obtain(null,MyIntentService.MSG_REGISTER_CLIENT);
+            Message msg = Message.obtain(null,MyService.MSG_REGISTER_CLIENT);
             msg.replyTo = mMessenger;
             try {
                 mService.send(msg);
@@ -107,11 +114,11 @@ public class SecondActivity extends AppCompatActivity {
             super.handleMessage(msg);
 
             switch (msg.what){
-                case MyIntentService.MSG_CURRENT_VALUE:
+                case MyService.MSG_CURRENT_VALUE:
                     setDataFromService(msg.obj);
                     break;
-                case MyIntentService.MSG_CURENT_INTENT_STOP:
-                    mTextView.setText(getResources().getString(R.string.intent_from_was_stopped, msg.obj.toString()));
+                case MyService.MSG_SERVICE_STOP:
+                    mTextView.setText(getResources().getString(R.string.service_was_stopped));
                     break;
             }
         }

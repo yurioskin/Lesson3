@@ -1,6 +1,6 @@
 package com.example.oskin.servicestartapp;
 
-import android.app.IntentService;
+import android.app.Service;
 import android.content.Intent;
 import android.content.Context;
 import android.os.Handler;
@@ -10,36 +10,61 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.widget.Switch;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.concurrent.TimeUnit;
 
-public class MyIntentService extends IntentService {
+public class MyService extends Service {
 
     public static final int MSG_REGISTER_CLIENT = 0x00001;
     public static final int MSG_UNREGISTER_CLIENT = 0x00002;
-    public static final int MSG_CURENT_INTENT_STOP = 0x00003;
+    public static final int MSG_SERVICE_STOP = 0x00003;
     public static final int MSG_CURRENT_VALUE = 0x00004;
-
-    public static boolean sShouldStop;
+    public static final int MSG_INTERRUPT = 0x00005;
 
     public static final String MSG_KEY = "message_kew";
 
-    public MyIntentService() {
-        super("MyIntentService");
+    private final static int MODE = Service.START_NOT_STICKY;
+
+    private boolean isInterrupted = false;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Message msg;
+                    for (int i = 0; ;i++) {
+                        if (isInterrupted){
+                            msg = Message.obtain(null, MSG_SERVICE_STOP);
+                            for (Messenger messenger:mClients) {
+                                messenger.send(msg);
+                            }
+                            stopSelf();
+                            return;
+
+                        }
+                        msg = Message.obtain(null,MSG_CURRENT_VALUE,i);
+                        for (Messenger messenger:mClients) {
+                            messenger.send(msg);
+                        }
+                        TimeUnit.SECONDS.sleep(1);
+                    }
+                } catch (InterruptedException | RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
+
 
     @Override
     public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
-        sShouldStop = false;
-        return super.onStartCommand(intent, flags, startId);
+        return MODE;
     }
-
 
     private List<Messenger> mClients = new ArrayList<>();
 
@@ -61,36 +86,12 @@ public class MyIntentService extends IntentService {
                 case MSG_UNREGISTER_CLIENT:
                     mClients.remove(msg.replyTo);
                     break;
+                case MSG_INTERRUPT:
+                    isInterrupted = true;
+                    break;
             }
         }
     }
-
-
-    @Override
-    protected void onHandleIntent(Intent intent) {
-        sShouldStop = false;
-        Message msg;
-        try {
-            for (int i = 0; ;i++) {
-                if (sShouldStop){
-                    msg = Message.obtain(null, MSG_CURENT_INTENT_STOP, intent.getStringExtra(MSG_KEY));
-                    for (Messenger messenger:mClients) {
-                        messenger.send(msg);
-                    }
-                    return;
-                }
-                msg = Message.obtain(null,MSG_CURRENT_VALUE,i);
-                for (Messenger messenger:mClients) {
-                    messenger.send(msg);
-                }
-                TimeUnit.SECONDS.sleep(1);
-            }
-        } catch (InterruptedException | RemoteException e) {
-            e.printStackTrace();
-        }
-    }
-
-
 
     public static final Intent getIntentForSend(@NonNull Context context, @NonNull String message){
         Intent intent = newIntent(context);
@@ -99,7 +100,7 @@ public class MyIntentService extends IntentService {
     }
 
     public static final Intent newIntent(Context context){
-        Intent intent = new Intent(context, MyIntentService.class);
+        Intent intent = new Intent(context, MyService.class);
         return intent;
     }
 }

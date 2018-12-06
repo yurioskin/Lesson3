@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onClick(View v) {
-            startService(MyIntentService.getIntentForSend(MainActivity.this, "Main Activity"));
+            startService(MyService.getIntentForSend(MainActivity.this, "Main Activity"));
         }
     }
 
